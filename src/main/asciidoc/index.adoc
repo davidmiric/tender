@@ -1,0 +1,10 @@
+= Tender application REST API
+
+Create new tender successfully.
+
+.request
+include::{snippets}/create-tender/http-request.adoc[]
+
+.response
+include::{snippets}/create-tender/http-response.adoc[]
+

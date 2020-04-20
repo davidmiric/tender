@@ -14,10 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.List;
 import java.util.Optional;
 
+import static com.example.tender.service.TenderService.mapTenderToDto;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -70,6 +72,36 @@ public class TenderServiceTest {
         when(issuerRepository.findById(1L)).thenReturn(Optional.empty());
         // when
         tenderService.createTender(newTenderDto);
+        // then
+    }
+
+    @Test
+    public void getTendersForIssuer_returnListOfTenderDtos() {
+        // given
+        Issuer issuer = new Issuer().setName("Issuer").setId(1L);
+        Tender tender1 = new Tender().setIssuer(issuer).setId(1L).setDescription("Tender1");
+        Tender tender2 = new Tender().setIssuer(issuer).setId(2L).setDescription("Tender2");
+        issuer.getTenders().add(tender1);
+        issuer.getTenders().add(tender2);
+        when(issuerRepository.findById(issuer.getId())).thenReturn(Optional.of(issuer));
+        // when
+        List<TenderDto> result = tenderService.getTendersForIssuer(issuer.getId());
+        // then
+        assertNotNull(result);
+        assertThat(result, hasSize(2));
+        assertThat(result, containsInAnyOrder(mapTenderToDto(tender1), mapTenderToDto(tender2)));
+    }
+
+    @Test
+    public void getTendersForIssuer_whenInvalidIssuer_throwException() {
+        // given
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("Issuer with id{1} does not exist.");
+
+        Long notExistingIssuerId = 1L;
+        when(issuerRepository.findById(notExistingIssuerId)).thenReturn(Optional.empty());
+        // when
+        tenderService.getTendersForIssuer(notExistingIssuerId);
         // then
     }
 

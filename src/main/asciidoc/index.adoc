@@ -1,6 +1,7 @@
 = Tender application REST API
+Author - David Miric, david.r.miric@gmail.com
 
-Create new tender successfully.
+== Create new tender successfully.
 
 .request
 include::{snippets}/create-tender/http-request.adoc[]
@@ -8,3 +9,16 @@ include::{snippets}/create-tender/http-request.adoc[]
 .response
 include::{snippets}/create-tender/http-response.adoc[]
 
+.curl
+include::{snippets}/create-tender/curl-request.adoc[]
+
+== Get list of all tenders created by given Issuer.
+
+.request
+include::{snippets}/issuer-tenders/http-request.adoc[]
+
+.response
+include::{snippets}/issuer-tenders/http-response.adoc[]
+
+.curl
+include::{snippets}/issuer-tenders/curl-request.adoc[]

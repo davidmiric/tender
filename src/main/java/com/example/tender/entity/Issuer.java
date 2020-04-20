@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "issuers")
@@ -22,6 +23,6 @@ public class Issuer {
     private String name;
 
     @OneToMany(mappedBy = "issuer")
-    private List<Tender> tenders;
+    private List<Tender> tenders = new ArrayList<>();
 
 }

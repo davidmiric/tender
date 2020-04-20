@@ -9,7 +9,9 @@ import com.example.tender.repository.TenderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TenderService {
@@ -30,10 +32,20 @@ public class TenderService {
         return mapTenderToDto(tenderRepository.save(newTender));
     }
 
-    TenderDto mapTenderToDto(Tender tender) {
+    public static TenderDto mapTenderToDto(Tender tender) {
         return new TenderDto().setId(tender.getId())
                 .setDescription(tender.getDescription())
                 .setIssuerId(tender.getIssuer().getId());
     }
 
+    public List<TenderDto> getTendersForIssuer(Long issuerId) {
+        Optional<Issuer> issuer = issuerRepository.findById(issuerId);
+        if (issuer.isPresent()) {
+            return issuer.get().getTenders().stream()
+                    .map(TenderService::mapTenderToDto)
+                    .collect(Collectors.toList());
+        } else {
+            throw new BadRequestException(String.format("Issuer with id{%d} does not exist.", issuerId));
+        }
+    }
 }

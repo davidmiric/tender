@@ -1,6 +1,7 @@
 package com.example.tender.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Entity(name = "issuers")
 @Data
+@Accessors(chain = true)
 public class Issuer {
 
     @Id

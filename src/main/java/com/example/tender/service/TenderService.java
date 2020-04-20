@@ -30,7 +30,7 @@ public class TenderService {
         return mapTenderToDto(tenderRepository.save(newTender));
     }
 
-    private TenderDto mapTenderToDto(Tender tender) {
+    TenderDto mapTenderToDto(Tender tender) {
         return new TenderDto().setId(tender.getId())
                 .setDescription(tender.getDescription())
                 .setIssuerId(tender.getIssuer().getId());

@@ -31,7 +31,6 @@ public class TenderController {
 
     // TODO: 4/20/2020 tenders of an issuer
 
-
     // TODO: 4/20/2020 offers of particular bidder
 
     // TODO: 4/20/2020 offers of particular bidder for particular tender

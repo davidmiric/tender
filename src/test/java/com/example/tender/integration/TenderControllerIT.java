@@ -37,7 +37,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.restdocs.templates.TemplateFormats.asciidoctor;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -115,15 +115,15 @@ public class TenderControllerIT {
         firstTenderCreatedByIssuer = tenderRepository.save(firstTenderCreatedByIssuer);
         secondTenderCreatedByIssuer = tenderRepository.save(secondTenderCreatedByIssuer);
         // when
-        MvcResult result = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/issuers/{id}/tenders", "1")
+        MvcResult result = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/tenders?issuerId=1", "1")
                 .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document("issuer-tenders",
                         responseFields(
                                 fieldWithPath("[]").description("An array of tenders."))
                                 .andWithPrefix("[].", TENDER_FIELDS),
-                        pathParameters(
-                                parameterWithName("id").description("Id of the given issuer."))))
+                        requestParameters(
+                                parameterWithName("issuerId").description("Optional id of issuer for filtering targets by issuer that created them."))))
                 .andReturn();
         List<TenderDto> returnedTenders = new Gson().fromJson(result.getResponse().getContentAsString(), new TypeToken<List<TenderDto>>() {
         }.getType());

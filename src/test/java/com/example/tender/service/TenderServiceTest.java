@@ -4,7 +4,6 @@ import com.example.tender.dto.TenderDto;
 import com.example.tender.entity.Issuer;
 import com.example.tender.entity.Tender;
 import com.example.tender.exception.BadRequestException;
-import com.example.tender.repository.IssuerRepository;
 import com.example.tender.repository.TenderRepository;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.example.tender.service.TenderService.mapTenderToDto;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,7 +32,7 @@ public class TenderServiceTest {
     @Mock
     private TenderRepository tenderRepository;
     @Mock
-    private IssuerRepository issuerRepository;
+    private IssuerService issuerService;
 
     @Test
     public void createTender_whenValidDtoIsPassed_thenReturnDtoOfCreatedDto() {
@@ -48,7 +46,7 @@ public class TenderServiceTest {
                 .setBestOffer(null);
         Tender tenderWithoutId = new Tender().setDescription(DESCRIPTION)
                 .setIssuer(issuer);
-        when(issuerRepository.findById(1L)).thenReturn(Optional.of(issuer));
+        when(issuerService.getIssuerById(1L)).thenReturn(issuer);
         when(tenderRepository.save(tenderWithoutId)).thenReturn(correctTenderEntity);
 
         // when
@@ -69,7 +67,7 @@ public class TenderServiceTest {
         expectedException.expectMessage("Issuer with id{1} does not exist.");
 
         TenderDto newTenderDto = new TenderDto().setIssuerId(1L).setDescription(DESCRIPTION);
-        when(issuerRepository.findById(1L)).thenReturn(Optional.empty());
+        when(issuerService.getIssuerById(1L)).thenThrow(new BadRequestException("Issuer with id{1} does not exist."));
         // when
         tenderService.createTender(newTenderDto);
         // then
@@ -83,9 +81,9 @@ public class TenderServiceTest {
         Tender tender2 = new Tender().setIssuer(issuer).setId(2L).setDescription("Tender2");
         issuer.getTenders().add(tender1);
         issuer.getTenders().add(tender2);
-        when(issuerRepository.findById(issuer.getId())).thenReturn(Optional.of(issuer));
+        when(issuerService.getIssuerById(1L)).thenReturn(issuer);
         // when
-        List<TenderDto> result = tenderService.getTendersForIssuer(issuer.getId());
+        List<TenderDto> result = tenderService.getTenders(issuer.getId());
         // then
         assertNotNull(result);
         assertThat(result, hasSize(2));
@@ -99,9 +97,9 @@ public class TenderServiceTest {
         expectedException.expectMessage("Issuer with id{1} does not exist.");
 
         Long notExistingIssuerId = 1L;
-        when(issuerRepository.findById(notExistingIssuerId)).thenReturn(Optional.empty());
+        when(issuerService.getIssuerById(notExistingIssuerId)).thenThrow(new BadRequestException("Issuer with id{1} does not exist."));
         // when
-        tenderService.getTendersForIssuer(notExistingIssuerId);
+        tenderService.getTenders(notExistingIssuerId);
         // then
     }
 

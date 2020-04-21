@@ -2,12 +2,16 @@ package com.example.tender.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
 
 @Data
+@Accessors(chain = true)
 @NoArgsConstructor
 public class OfferDto {
+
+    private Long id;
 
     @NotNull
     private Long bidderId;

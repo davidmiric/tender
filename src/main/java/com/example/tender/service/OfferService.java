@@ -9,6 +9,9 @@ import com.example.tender.repository.OfferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class OfferService {
 
@@ -26,13 +29,13 @@ public class OfferService {
             Offer offer = new Offer().setAmount(offerDto.getAmount())
                     .setBidder(bidder)
                     .setTender(tender);
-            return mapToOfferDto(offerRepository.save(offer));
+            return mapOfferToDto(offerRepository.save(offer));
         } else {
             throw new BadRequestException(String.format("Offer cannot be accepted. Tender with id{%d} is closed.", offerDto.getTenderId()));
         }
     }
 
-    private static OfferDto mapToOfferDto(Offer offer) {
+    public static OfferDto mapOfferToDto(Offer offer) {
         return new OfferDto().setId(offer.getId())
                 .setAmount(offer.getAmount())
                 .setBidderId(offer.getBidder().getId())
@@ -43,8 +46,13 @@ public class OfferService {
         Offer offer = offerRepository.findById(offerId).orElseThrow(() ->
                 new BadRequestException(String.format("Offer with id{%d} does not exist", offerId)));
         tenderService.acceptOffer(offer);
-        return mapToOfferDto(offer);
+        return mapOfferToDto(offer);
     }
 
 
+    public List<OfferDto> getOffers(Long tenderId, Long bidderId) {
+        return offerRepository.filterAllByTenderAndBidder(tenderId, bidderId).stream()
+                .map(OfferService::mapOfferToDto)
+                .collect(Collectors.toList());
+    }
 }

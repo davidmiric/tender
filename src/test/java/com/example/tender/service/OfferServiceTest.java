@@ -6,6 +6,7 @@ import com.example.tender.entity.Offer;
 import com.example.tender.entity.Tender;
 import com.example.tender.exception.BadRequestException;
 import com.example.tender.repository.OfferRepository;
+import org.assertj.core.util.Lists;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -14,10 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
+import static com.example.tender.service.OfferService.mapOfferToDto;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OfferServiceTest {
+
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -41,8 +44,8 @@ public class OfferServiceTest {
     private static final Long BIDDER_ID = 2L;
     private static final Long OFFER_ID_1 = 1L;
     private static final Long TENDER_ID = 2L;
-    private static final Double AMOUNT = 100d;
-
+    private static final Double AMOUNT = 100D;
+    private static final Double AMOUNT2 = 200D;
     @Test
     public void submitOffer() {
         //given
@@ -118,5 +121,26 @@ public class OfferServiceTest {
         //then
     }
 
+    @Test
+    public void getOffers() {
+        //given
+        Long tenderId = 888l;
+        Long bidderId = 999l;
+        Offer offer1 = new Offer().setId(1l)
+                .setTender(new Tender().setId(TENDER_ID))
+                .setBidder(new Bidder().setId(BIDDER_ID))
+                .setAmount(AMOUNT);
+        Offer offer2 = new Offer().setId(1l)
+                .setTender(new Tender().setId(TENDER_ID))
+                .setBidder(new Bidder().setId(BIDDER_ID))
+                .setAmount(AMOUNT2);
+
+        when(offerRepository.filterAllByTenderAndBidder(tenderId, bidderId)).thenReturn(Lists.list(offer1, offer2));
+        //when
+        List<OfferDto> result = offerService.getOffers(tenderId, bidderId);
+        //then
+        assertNotNull(result);
+        assertThat(result, containsInAnyOrder(mapOfferToDto(offer1), mapOfferToDto(offer2)));
+    }
 
 }

@@ -28,7 +28,7 @@ public class Offer {
     @JoinColumn(name = "bidder_id")
     private Bidder bidder;
 
-    @OneToOne
+    @OneToOne(orphanRemoval = true)
     @JoinColumn(name = "tender_id")
     private Tender tender;
 

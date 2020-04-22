@@ -12,6 +12,7 @@ import com.example.tender.repository.OfferRepository;
 import com.example.tender.repository.TenderRepository;
 import com.example.tender.service.TenderService;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,7 +30,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
+import static com.example.tender.service.OfferService.mapOfferToDto;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,8 +42,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.templates.TemplateFormats.asciidoctor;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,6 +57,7 @@ public class OfferControllerIT {
     private static final Gson gson = new Gson();
 
     private static final Double AMOUNT = 100D;
+    private static final Double AMOUNT2 = 200D;
 
     private static final FieldDescriptor[] OFFER_FIELDS = new FieldDescriptor[]{
             fieldWithPath("id").description("The id of created tender."),
@@ -111,7 +116,6 @@ public class OfferControllerIT {
         assertThat(returnedValue.getTenderId(), is(newOffer.getTenderId()));
     }
 
-
     @Test
     public void acceptOffer_thenAcceptAndReturnOffer() throws Exception {
         // given
@@ -145,5 +149,37 @@ public class OfferControllerIT {
         tender = tenderRepository.findById(tender.getId()).get();
         assertFalse(tender.isActive());
         assertThat(tender.getBestOffer().getId(), is(offerToBeAccepted.getId()));
+    }
+
+    @Test
+    public void getOffers_returnOffersFilteredByTenderAndBidder() throws Exception {
+        // given
+        offerRepository.deleteAll();
+        tenderRepository.deleteAll();
+        Bidder bidder1 = bidderRepository.findById(1l).get();
+        Issuer issuer = issuerRepository.findById(1l).get();
+        Tender tender1 = tenderRepository.save(new Tender().setDescription("tender 1 description")
+                .setIssuer(issuer));
+        Offer offer1 = offerRepository.save(new Offer().setTender(tender1).setAmount(AMOUNT).setBidder(bidder1));
+        Offer offer2 = offerRepository.save(new Offer().setTender(tender1).setAmount(AMOUNT2).setBidder(bidder1));
+        // when
+        MvcResult result = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/offers?tenderId={%d}&bidderId={%d}", tender1.getId(), bidder1.getId()))
+                .andExpect(status().isOk())
+                .andDo(document("get-offers",
+                        responseFields(
+                                fieldWithPath("[]").description("An array of offers."))
+                                .andWithPrefix("[].", OFFER_FIELDS),
+                        requestParameters(
+                                parameterWithName("tenderId").description("Tender id for offers to be filtered by."),
+                                parameterWithName("bidderId").description("Bidder id for offers to be filtered by."))))
+                .andReturn();
+
+        // then
+        List<OfferDto> returnedOffers = new Gson()
+                .fromJson(result.getResponse().getContentAsString(), new TypeToken<List<OfferDto>>() {
+                }.getType());
+        // then
+        assertNotNull(returnedOffers);
+        assertThat(returnedOffers, containsInAnyOrder(mapOfferToDto(offer1), mapOfferToDto(offer2)));
     }
 }

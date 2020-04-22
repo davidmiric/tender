@@ -65,22 +65,22 @@ include::{snippets}/submit-offer/response-fields.adoc[]
 .curl
 include::{snippets}/submit-offer/curl-request.adoc[]
 
-== Accept an offer.
+== Get all offers, optionally filtered by Tender and/or Bidder, returns all by default.
 
 .request
-include::{snippets}/accept-offer/http-request.adoc[]
+include::{snippets}/get-offers/http-request.adoc[]
 
-.path parameters
-include::{snippets}/accept-offer/path-parameters.adoc[]
+.request parameters
+include::{snippets}/get-offers/request-parameters.adoc[]
 
 .response
-include::{snippets}/accept-offer/http-response.adoc[]
+include::{snippets}/get-offers/http-response.adoc[]
 
 .response body
-include::{snippets}/accept-offer/response-body.adoc[]
+include::{snippets}/get-offers/response-body.adoc[]
 
 .response body fields
-include::{snippets}/accept-offer/response-fields.adoc[]
+include::{snippets}/get-offers/response-fields.adoc[]
 
 .curl
-include::{snippets}/accept-offer/curl-request.adoc[]
+include::{snippets}/get-offers/curl-request.adoc[]

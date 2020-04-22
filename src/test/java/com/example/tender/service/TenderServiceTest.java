@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.tender.service.TenderService.mapTenderToDto;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -119,6 +120,7 @@ public class TenderServiceTest {
         Offer offer = new Offer().setId(2L)
                 .setTender(tender);
         when(tenderRepository.save(tender)).thenReturn(tender);
+        when(tenderRepository.findById(tender.getId())).thenReturn(Optional.of(tender));
         // when
         Tender result = tenderService.acceptOffer(offer);
         // then
@@ -135,6 +137,7 @@ public class TenderServiceTest {
         Tender closedTender = new Tender().setId(1l)
                 .setDescription(DESCRIPTION)
                 .setActive(false);
+        when(tenderRepository.findById(closedTender.getId())).thenReturn(Optional.of(closedTender));
         Offer offer = new Offer().setId(2L)
                 .setTender(closedTender);
         // when

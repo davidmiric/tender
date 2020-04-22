@@ -126,8 +126,8 @@ public class TenderControllerIT {
                         requestParameters(
                                 parameterWithName("issuerId").description("Optional id of issuer for filtering targets by issuer that created them."))))
                 .andReturn();
-        List<TenderDto> returnedTenders = new Gson().fromJson(result.getResponse().getContentAsString(), new TypeToken<List<TenderDto>>() {
-        }.getType());
+        List<TenderDto> returnedTenders = new Gson()
+                .fromJson(result.getResponse().getContentAsString(), new TypeToken<List<TenderDto>>() {}.getType());
         // then
         assertNotNull(returnedTenders);
         assertThat(returnedTenders, containsInRelativeOrder(mapTenderToDto(firstTenderCreatedByIssuer), mapTenderToDto(secondTenderCreatedByIssuer)));

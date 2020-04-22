@@ -1,6 +1,7 @@
 package com.example.tender.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.Entity;
@@ -12,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "issuers")
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 public class Issuer {
 

@@ -16,7 +16,7 @@ include::{snippets}/create-tender/http-response.adoc[]
 .response body
 include::{snippets}/create-tender/response-body.adoc[]
 
-.response body
+.response body fields
 include::{snippets}/create-tender/response-fields.adoc[]
 
 .curl
@@ -24,13 +24,13 @@ include::{snippets}/create-tender/curl-request.adoc[]
 
 
 
-== Get list of all tenders created by given Issuer.
+== Get list of all tenders or just the ones created by given Issuer.
 
 .request
 include::{snippets}/issuer-tenders/http-request.adoc[]
 
-.request body
-include::{snippets}/issuer-tenders/request-body.adoc[]
+.request parameters
+include::{snippets}/issuer-tenders/request-parameters.adoc[]
 
 .response
 include::{snippets}/issuer-tenders/http-response.adoc[]
@@ -38,14 +38,14 @@ include::{snippets}/issuer-tenders/http-response.adoc[]
 .response body
 include::{snippets}/issuer-tenders/response-body.adoc[]
 
-.response body
+.response body fields
 include::{snippets}/issuer-tenders/response-fields.adoc[]
 
 .curl
 include::{snippets}/issuer-tenders/curl-request.adoc[]
 
 
-== Submit new offer for a tender
+== Submit new offer for a tender.
 
 .request
 include::{snippets}/submit-offer/http-request.adoc[]
@@ -59,8 +59,28 @@ include::{snippets}/submit-offer/http-response.adoc[]
 .response body
 include::{snippets}/submit-offer/response-body.adoc[]
 
-.response body
+.response body fields
 include::{snippets}/submit-offer/response-fields.adoc[]
 
 .curl
 include::{snippets}/submit-offer/curl-request.adoc[]
+
+== Accept an offer.
+
+.request
+include::{snippets}/accept-offer/http-request.adoc[]
+
+.path parameters
+include::{snippets}/accept-offer/path-parameters.adoc[]
+
+.response
+include::{snippets}/accept-offer/http-response.adoc[]
+
+.response body
+include::{snippets}/accept-offer/response-body.adoc[]
+
+.response body fields
+include::{snippets}/accept-offer/response-fields.adoc[]
+
+.curl
+include::{snippets}/accept-offer/curl-request.adoc[]

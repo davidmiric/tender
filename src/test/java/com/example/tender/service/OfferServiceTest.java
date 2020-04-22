@@ -14,12 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Optional;
+
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OfferServiceTest {
@@ -37,6 +39,7 @@ public class OfferServiceTest {
     private BidderService bidderService;
 
     private static final Long BIDDER_ID = 2L;
+    private static final Long OFFER_ID_1 = 1L;
     private static final Long TENDER_ID = 2L;
     private static final Double AMOUNT = 100d;
 
@@ -68,7 +71,6 @@ public class OfferServiceTest {
     @Test
     public void submitOffer_throwExceptionIfTenderIsClosed() {
         // given
-        Long notExistingTenderId = 1L;
         Tender tender = new Tender().setId(TENDER_ID)
                 .setActive(false);
         String exceptionMessage =String.format("Offer cannot be accepted. Tender with id{%d} is closed.", TENDER_ID);
@@ -83,5 +85,38 @@ public class OfferServiceTest {
         offerService.submitOffer(newOfferDto);
         // then
     }
+
+    @Test
+    public void acceptOffer() {
+        //given
+        Offer offer = new Offer().setId(1l)
+                .setTender(new Tender().setId(TENDER_ID))
+                .setBidder(new Bidder().setId(BIDDER_ID))
+                .setAmount(AMOUNT);
+        when(offerRepository.findById(OFFER_ID_1)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(OFFER_ID_1)).thenReturn(Optional.of(offer));
+        //when
+        OfferDto  result = offerService.acceptOffer(OFFER_ID_1);
+        //then
+        verify(tenderService, times(1)).acceptOffer(offer);
+        assertNotNull(result);
+        assertThat(result.getId(), greaterThan(0l));
+        assertThat(result.getTenderId(), is(TENDER_ID));
+        assertThat(result.getBidderId(), is(BIDDER_ID));
+        assertThat(result.getAmount(), is(AMOUNT));
+    }
+
+    @Test
+    public void acceptOffer_throwExceptionIfNotExist() {
+        //given
+        String exceptionMessage =String.format("Offer with id{%d} does not exist", OFFER_ID_1);
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage(exceptionMessage);
+        when(offerRepository.findById(OFFER_ID_1)).thenReturn(Optional.empty());
+        //when
+        OfferDto  result = offerService.acceptOffer(OFFER_ID_1);
+        //then
+    }
+
 
 }

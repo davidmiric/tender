@@ -2,9 +2,11 @@ package com.example.tender.service;
 
 import com.example.tender.dto.TenderDto;
 import com.example.tender.entity.Issuer;
+import com.example.tender.entity.Offer;
 import com.example.tender.entity.Tender;
 import com.example.tender.exception.BadRequestException;
 import com.example.tender.repository.TenderRepository;
+import org.assertj.core.util.Lists;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -18,6 +20,7 @@ import java.util.List;
 import static com.example.tender.service.TenderService.mapTenderToDto;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -74,20 +77,25 @@ public class TenderServiceTest {
     }
 
     @Test
-    public void getTendersForIssuer_returnListOfTenderDtos() {
+    public void getTendersAllAndByIssuer_returnListOfTenderDtos() {
         // given
         Issuer issuer = new Issuer().setName("Issuer").setId(1L);
         Tender tender1 = new Tender().setIssuer(issuer).setId(1L).setDescription("Tender1");
         Tender tender2 = new Tender().setIssuer(issuer).setId(2L).setDescription("Tender2");
+        Tender tender3 = new Tender().setIssuer(issuer).setId(3L).setDescription("Tender3");
         issuer.getTenders().add(tender1);
         issuer.getTenders().add(tender2);
         when(issuerService.getIssuerById(1L)).thenReturn(issuer);
+        when(tenderRepository.findAllByIssuer(issuer)).thenReturn(Lists.list(tender1, tender2));
+        when(tenderRepository.findAll()).thenReturn(Lists.list(tender1, tender2, tender3));
         // when
-        List<TenderDto> result = tenderService.getTenders(issuer.getId());
+        List<TenderDto> resultAll = tenderService.getTenders(null);
+        List<TenderDto> resultByIssue = tenderService.getTenders(issuer.getId());
         // then
-        assertNotNull(result);
-        assertThat(result, hasSize(2));
-        assertThat(result, containsInAnyOrder(mapTenderToDto(tender1), mapTenderToDto(tender2)));
+        assertNotNull(resultAll);
+        assertThat(resultAll, containsInRelativeOrder(mapTenderToDto(tender1), mapTenderToDto(tender2), mapTenderToDto(tender3)));
+        assertNotNull(resultByIssue);
+        assertThat(resultByIssue, containsInRelativeOrder(mapTenderToDto(tender1), mapTenderToDto(tender2)));
     }
 
     @Test
@@ -103,4 +111,34 @@ public class TenderServiceTest {
         // then
     }
 
+    @Test
+    public void acceptOffer() {
+        // given
+        Tender tender = new Tender().setId(1l)
+                .setDescription(DESCRIPTION);
+        Offer offer = new Offer().setId(2L)
+                .setTender(tender);
+        when(tenderRepository.save(tender)).thenReturn(tender);
+        // when
+        Tender result = tenderService.acceptOffer(offer);
+        // then
+        assertNotNull(result);
+        assertFalse(result.isActive());
+        assertThat(result.getBestOffer().getId(), is(offer.getId()));
+    }
+
+    @Test
+    public void acceptOffer_throwExceptionIfTenderIsClosed() {
+        // given
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage(String.format("Cannot accept the offer. Tender with id{%d} is already closed.", 1L));
+        Tender closedTender = new Tender().setId(1l)
+                .setDescription(DESCRIPTION)
+                .setActive(false);
+        Offer offer = new Offer().setId(2L)
+                .setTender(closedTender);
+        // when
+        tenderService.acceptOffer(offer);
+        // then
+    }
 }

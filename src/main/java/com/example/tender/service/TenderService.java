@@ -2,12 +2,14 @@ package com.example.tender.service;
 
 import com.example.tender.dto.TenderDto;
 import com.example.tender.entity.Issuer;
+import com.example.tender.entity.Offer;
 import com.example.tender.entity.Tender;
 import com.example.tender.exception.BadRequestException;
-import com.example.tender.repository.BidderRepository;
 import com.example.tender.repository.TenderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,10 +22,6 @@ public class TenderService {
 
     @Autowired
     private IssuerService issuerService;
-
-
-    @Autowired
-    private BidderRepository bidderRepository;
 
     public TenderDto createTender(TenderDto tenderDto) throws BadRequestException {
         Issuer issuer = issuerService.getIssuerById(tenderDto.getIssuerId());
@@ -54,5 +52,17 @@ public class TenderService {
         return tenderRepository.findById(tenderId).orElseThrow(() ->
                 new BadRequestException(String.format("Tender with id{%d} does not exist.", tenderId))
         );
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Tender acceptOffer(Offer offer) {
+        Tender tender = getTenderById(offer.getTender().getId());
+        if (tender.isActive()) {
+            return tenderRepository.save(tender.setBestOffer(offer)
+                    .setActive(false));
+        } else {
+            throw new BadRequestException(
+                    String.format("Cannot accept the offer. Tender with id{%d} is already closed.", tender.getId()));
+        }
     }
 }

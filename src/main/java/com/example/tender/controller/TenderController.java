@@ -35,13 +35,4 @@ public class TenderController {
         return ResponseEntity.ok(tenderService.getTenders(issuerId));
     }
 
-
-    // TODO: 4/21/2020 accept offer
-
-    // TODO: 4/20/2020 get all offers for tender
-
-    // TODO: 4/20/2020 offers of particular bidder
-
-    // TODO: 4/20/2020 offers of particular bidder for particular tender
-
 }

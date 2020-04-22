@@ -1,6 +1,8 @@
 package com.example.tender.entity;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.Column;
@@ -14,7 +16,9 @@ import javax.persistence.OneToOne;
 import javax.validation.constraints.Size;
 
 @Entity(name = "tenders")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @Accessors(chain = true)
 public class Tender {
 

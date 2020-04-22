@@ -2,8 +2,13 @@ package com.example.tender.integration;
 
 import com.example.tender.TenderApplication;
 import com.example.tender.dto.OfferDto;
+import com.example.tender.entity.Bidder;
+import com.example.tender.entity.Issuer;
+import com.example.tender.entity.Offer;
 import com.example.tender.entity.Tender;
+import com.example.tender.repository.BidderRepository;
 import com.example.tender.repository.IssuerRepository;
+import com.example.tender.repository.OfferRepository;
 import com.example.tender.repository.TenderRepository;
 import com.example.tender.service.TenderService;
 import com.google.gson.Gson;
@@ -15,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,11 +31,14 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.templates.TemplateFormats.asciidoctor;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,6 +51,8 @@ public class OfferControllerIT {
 
 
     private static final Gson gson = new Gson();
+
+    private static final Double AMOUNT = 100D;
 
     private static final FieldDescriptor[] OFFER_FIELDS = new FieldDescriptor[]{
             fieldWithPath("id").description("The id of created tender."),
@@ -60,6 +71,10 @@ public class OfferControllerIT {
     private WebApplicationContext context;
     @Autowired
     private IssuerRepository issuerRepository;
+    @Autowired
+    private BidderRepository bidderRepository;
+    @Autowired
+    private OfferRepository offerRepository;
 
     private MockMvc mockMvc;
 
@@ -96,4 +111,39 @@ public class OfferControllerIT {
         assertThat(returnedValue.getTenderId(), is(newOffer.getTenderId()));
     }
 
+
+    @Test
+    public void acceptOffer_thenAcceptAndReturnOffer() throws Exception {
+        // given
+        Bidder bidder = bidderRepository.findById(1l).get();
+        Issuer issuer = issuerRepository.findById(1l).get();
+        Tender tender = tenderRepository.save(new Tender().setDescription("Tender description")
+                .setIssuer(issuer));
+        Offer offerToBeAccepted = new Offer().setAmount(AMOUNT)
+                .setBidder(bidder)
+                .setTender(tender);
+        offerRepository.save(offerToBeAccepted);
+        OfferDto newOffer = new OfferDto().setAmount(AMOUNT)
+                .setBidderId(bidder.getId())
+                .setTenderId(tender.getId());
+
+        // when
+        MvcResult result = this.mockMvc.perform(RestDocumentationRequestBuilders.post("/offers/{id}/accept", offerToBeAccepted.getId()))
+                .andExpect(status().isOk())
+                .andDo(document("accept-offer",
+                        responseFields(OFFER_FIELDS),
+                        pathParameters(
+                                parameterWithName("id").description("Id of offer to be accepted."))))
+                .andReturn();
+
+        // then
+        OfferDto returnedValue = gson.fromJson(result.getResponse().getContentAsString(), OfferDto.class);
+        assertNotNull(returnedValue.getId());
+        assertThat(returnedValue.getBidderId(), is(newOffer.getBidderId()));
+        assertThat(returnedValue.getAmount(), is(newOffer.getAmount()));
+        assertThat(returnedValue.getTenderId(), is(newOffer.getTenderId()));
+        tender = tenderRepository.findById(tender.getId()).get();
+        assertFalse(tender.isActive());
+        assertThat(tender.getBestOffer().getId(), is(offerToBeAccepted.getId()));
+    }
 }

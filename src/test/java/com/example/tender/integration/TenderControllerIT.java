@@ -30,7 +30,8 @@ import java.util.List;
 
 import static com.example.tender.service.TenderService.mapTenderToDto;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -115,7 +116,7 @@ public class TenderControllerIT {
         firstTenderCreatedByIssuer = tenderRepository.save(firstTenderCreatedByIssuer);
         secondTenderCreatedByIssuer = tenderRepository.save(secondTenderCreatedByIssuer);
         // when
-        MvcResult result = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/tenders?issuerId=1", "1")
+        MvcResult result = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/tenders?issuerId=1")
                 .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document("issuer-tenders",
@@ -129,8 +130,7 @@ public class TenderControllerIT {
         }.getType());
         // then
         assertNotNull(returnedTenders);
-        assertThat(returnedTenders, hasSize(2));
-        assertThat(returnedTenders, containsInAnyOrder(mapTenderToDto(firstTenderCreatedByIssuer), mapTenderToDto(secondTenderCreatedByIssuer)));
+        assertThat(returnedTenders, containsInRelativeOrder(mapTenderToDto(firstTenderCreatedByIssuer), mapTenderToDto(secondTenderCreatedByIssuer)));
     }
 
 

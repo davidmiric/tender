@@ -38,4 +38,13 @@ public class OfferService {
                 .setBidderId(offer.getBidder().getId())
                 .setTenderId(offer.getTender().getId());
     }
+
+    public OfferDto acceptOffer(Long offerId) {
+        Offer offer = offerRepository.findById(offerId).orElseThrow(() ->
+                new BadRequestException(String.format("Offer with id{%d} does not exist", offerId)));
+        tenderService.acceptOffer(offer);
+        return mapToOfferDto(offer);
+    }
+
+
 }

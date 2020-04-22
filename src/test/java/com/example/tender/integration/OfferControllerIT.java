@@ -60,7 +60,7 @@ public class OfferControllerIT {
     private static final Double AMOUNT2 = 200D;
 
     private static final FieldDescriptor[] OFFER_FIELDS = new FieldDescriptor[]{
-            fieldWithPath("id").description("The id of created tender."),
+            fieldWithPath("id").description("The id of created offer."),
             fieldWithPath("bidderId").description("The id of bidder who makes and offer."),
             fieldWithPath("tenderId").description("Tender id, this offer is meant for."),
             fieldWithPath("amount").description("The money amount offered for this tender.")};

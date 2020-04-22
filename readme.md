@@ -10,14 +10,14 @@ CONTENTS OF THIS FILE
  INTRODUCTION
  ------------
  
- The Tender application is homework assingment from Omero which is part of the interview process. 
+ The Tender application is homework assignment from Omero which is part of the interview process. 
  It is meant to be built in one working day. I have wrote it with some assumptions made along the way
- to make whole work simpler. The task is to create back end application for tender management including creation of tenders,
- submitting/accepting offers and fetching data.
- 
-  * For a full description of the task, please have a look at pdf in this repository:
-    Homework Assignment.pdf
-    
+ to make whole work simpler. They are described down below in DECISIONS section.
+ The task is following:  For a construction project, an issuer can create a tender describing the work that needs to be
+                         done on the construction site for which a bidder can hand in one or more offers. The issuer can
+                         then accept out of the given offers only one that suits best. All the other offers are getting
+                         rejected immediately. Once an offer gets accepted, it cannot be rejected anymore.
+
 DECISIONS
 ------------
  
